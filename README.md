@@ -3,9 +3,6 @@
  
 
 ## AIM:
- 
-
- 
 
 To write a C program to implement the Playfair Substitution technique.
 
@@ -35,9 +32,90 @@ STEP-5: Display the obtained cipher text.
 
 
 Program:
+```
 
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 
+char keyTable[5][5];
 
+void generateKeyTable(char key[]) {
+    int used[26] = {0}, i, j, k = 0;
+    char temp[25];
 
+    for (i = 0; key[i]; i++) {
+        char ch = toupper(key[i]);
+        if (ch == 'J') ch = 'I';
+        if (ch >= 'A' && ch <= 'Z' && !used[ch - 'A']) {
+            used[ch - 'A'] = 1;
+            temp[k++] = ch;
+        }
+    }
 
+    used['J' - 'A'] = 1;
+
+    for (i = 0; i < 26; i++) {
+        if (!used[i])
+            temp[k++] = 'A' + i;
+    }
+
+    k = 0;
+    for (i = 0; i < 5; i++)
+        for (j = 0; j < 5; j++)
+            keyTable[i][j] = temp[k++];
+}
+
+void findPos(char ch, int *r, int *c) {
+    if (ch == 'J') ch = 'I';
+    for (int i = 0; i < 5; i++)
+        for (int j = 0; j < 5; j++)
+            if (keyTable[i][j] == ch) {
+                *r = i;
+                *c = j;
+                return;
+            }
+}
+
+void encrypt(char text[]) {
+    int i, r1, c1, r2, c2;
+
+    for (i = 0; text[i]; i += 2) {
+        findPos(toupper(text[i]), &r1, &c1);
+        findPos(toupper(text[i + 1]), &r2, &c2);
+
+        if (r1 == r2) {
+            printf("%c%c",
+                   keyTable[r1][(c1 + 1) % 5],
+                   keyTable[r2][(c2 + 1) % 5]);
+        } else if (c1 == c2) {
+            printf("%c%c",
+                   keyTable[(r1 + 1) % 5][c1],
+                   keyTable[(r2 + 1) % 5][c2]);
+        } else {
+            printf("%c%c",
+                   keyTable[r1][c2],
+                   keyTable[r2][c1]);
+        }
+    }
+}
+
+int main() {
+    char key[30], text[100];
+
+    printf("Enter key: ");
+    scanf("%s", key);
+
+    printf("Enter plaintext (even letters): ");
+    scanf("%s", text);
+
+    generateKeyTable(key);
+
+    printf("Encrypted Text: ");
+    encrypt(text);
+
+    return 0;
+}
+```
 Output:
+<img width="337" height="122" alt="image" src="https://github.com/user-attachments/assets/58dfba88-2981-4bcd-8266-ed03d22f165d" />
